@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>Place Order</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Background Gradient */
+        body {
+            background: linear-gradient(135deg, #dc3545, #ffc107);
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        /* Logo */
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo img {
+            width: 180px;
+        }
+
+        /* Form Inputs */
+        .customer-info {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+        .customer-info label {
+            font-weight: bold;
+        }
+
+        /* Order Cards */
+        .order-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .order-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        .item-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        .item-price {
+            font-size: 1.2rem;
+            color: #dc3545;
+        }
+
+        /* Custom Checkbox */
+        .custom-checkbox {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            position: relative;
+            padding-left: 35px;
+            margin-bottom: 12px;
+            user-select: none;
+        }
+        .custom-checkbox input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .custom-checkbox .checkmark {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 25px;
+            width: 25px;
+            background-color: #eee;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+        .custom-checkbox input:checked ~ .checkmark {
+            background-color: #28a745;
+        }
+        .custom-checkbox .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+        .custom-checkbox input:checked ~ .checkmark:after {
+            display: block;
+        }
+        .custom-checkbox .checkmark:after {
+            left: 9px;
+            top: 5px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            transform: rotate(45deg);
+        }
+
+        /* Quantity Controls */
+        .quantity-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .quantity-controls button {
+            background: #28a745;
+            color: #fff;
+            border: none;
+            padding: 3px 10px;
+            font-size: 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        .quantity-controls .quantity {
+            width: 30px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            display: block;
+            margin: 20px auto;
+            background: #dc3545;
+            color: #fff;
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .submit-btn:hover {
+            background: #b02a37;
+        }
+
+        @media (max-width: 768px) {
+            .order-card { padding: 15px; }
+            .item-name { font-size: 1.1rem; }
+            .item-price { font-size: 1rem; }
+            .quantity-controls button { padding: 2px 8px; font-size: 1rem; }
+            .quantity-controls .quantity { width: 25px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="logo">
+        <img src="{% static 'images/CrispyBite_logo.png' %}" alt="CrispyBite Logo">
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="customer-info">
+            <div class="mb-3">
+                <label for="customer_name" class="form-label">Your Name:</label>
+                <input type="text" name="customer_name" id="customer_name" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="phone" class="form-label">Phone Number:</label>
+                <input type="text" name="phone" id="phone" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email:</label>
+                <input type="email" name="email" id="email" class="form-control">
+            </div>
+        </div>
+
+        <div class="container my-5">
+            <h2 class="text-white mb-3">Your Order <i class="fas fa-shopping-cart"></i></h2>
+            <div class="row" id="ordered-items-container">
+                {% for item in ordered_items %}
+                <div class="col-md-6 mb-4" id="item-card-{{ item.menu_item.id }}">
+                    <div class="card order-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="item-name">{{ item.menu_item.name }}</h5>
+                                <h6 class="item-price">{{ item.menu_item.price }} EGP</h6>
+                            </div>
+                            <div class="quantity-controls">
+                                <button type="button" class="decrease" data-item-id="{{ item.menu_item.id }}">-</button>
+                                <span class="quantity">{{ item.quantity }}</span>
+                                <button type="button" class="increase" data-item-id="{{ item.menu_item.id }}">+</button>
+                            </div>
+                        </div>
+                        <input type="hidden" name="quantity-{{ item.menu_item.id }}" value="{{ item.quantity }}" class="quantity-input-hidden" data-item-id="{{ item.menu_item.id }}">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <h2 class="text-white mt-5 mb-3">Add More Items <i class="fas fa-plus-circle"></i></h2>
+            <div class="row" id="available-items-container">
+                {% for item in available_items %}
+                <div class="col-md-6 mb-4" id="item-card-{{ item.id }}">
+                    <div class="card order-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="item-name">{{ item.name }}</h5>
+                                <h6 class="item-price">{{ item.price }} EGP</h6>
+                            </div>
+                            <div class="quantity-controls">
+                                <button type="button" class="decrease" data-item-id="{{ item.id }}">-</button>
+                                <span class="quantity">0</span>
+                                <button type="button" class="increase" data-item-id="{{ item.id }}">+</button>
+                            </div>
+                        </div>
+                        <input type="hidden" name="quantity-{{ item.id }}" value="0" class="quantity-input-hidden" data-item-id="{{ item.id }}">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Submit Order</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const orderedContainer = document.getElementById('ordered-items-container');
+            const availableContainer = document.getElementById('available-items-container');
+
+            // Set up event listeners for all quantity controls
+            document.querySelectorAll('.increase, .decrease').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const card = e.target.closest('.col-md-6');
+                    const quantitySpan = card.querySelector('.quantity');
+                    const hiddenInput = card.querySelector('.quantity-input-hidden');
+                    let currentQuantity = parseInt(quantitySpan.textContent);
+
+                    if (e.target.classList.contains('increase')) {
+                        currentQuantity++;
+                    } else if (e.target.classList.contains('decrease')) {
+                        if (currentQuantity > 0) {
+                            currentQuantity--;
+                        }
+                    }
+
+                    quantitySpan.textContent = currentQuantity;
+                    hiddenInput.value = currentQuantity;
+
+                    // Move card between sections
+                    if (currentQuantity > 0 && card.parentElement.id === 'available-items-container') {
+                        orderedContainer.appendChild(card);
+                    } else if (currentQuantity === 0 && card.parentElement.id === 'ordered-items-container') {
+                        availableContainer.appendChild(card);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

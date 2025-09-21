@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>Check Your Order</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #dc3545, #ffc107);
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            padding: 30px;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img { width: 150px; }
+
+        .order-summary {
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        .order-summary h3 {
+            margin-bottom: 20px;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .summary-total {
+            font-weight: bold;
+            font-size: 1.3rem;
+            text-align: right;
+            margin-top: 15px;
+        }
+        .btn-confirm {
+            display: block;
+            width: 100%;
+            background: #28a745;
+            color: #fff;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .btn-confirm:hover { background: #218838; }
+        @media (max-width: 768px) {
+            .order-summary { padding: 15px; }
+            .summary-item { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <div class="logo">
+        <img src="{% static 'images/CrispyBite_logo.png' %}" alt="Logo">
+    </div>
+
+    <div class="order-summary">
+        <h3>Check Your Order</h3>
+
+        <!-- Customer Info -->
+        <p><strong>Name:</strong> {{ customer_name }}</p>
+        <p><strong>Phone:</strong> {{ phone }}</p>
+        <p><strong>Email:</strong> {{ email }}</p>
+
+        <!-- Items -->
+        {% for item, qty in items %}
+        <div class="summary-item">
+            <span>{{ item.name }} x {{ qty }}</span>
+            <span>{{ item.price|floatformat:2 }} EGP</span>
+        </div>
+        {% endfor %}
+
+        <div class="summary-total">
+            Total: {{ total_price|floatformat:2 }} EGP
+        </div>
+
+        <!-- confirm_order -->
+        <form method="post" action="{% url 'confirm_order' %}">
+            {% csrf_token %}
+            {% for item, qty in items %}
+                <input type="hidden" name="item" value="{{ item.id }}">
+                <input type="hidden" name="quantity" value="{{ qty }}">
+            {% endfor %}
+            <input type="hidden" name="customer_name" value="{{ customer_name }}">
+            <input type="hidden" name="phone" value="{{ phone }}">
+            <input type="hidden" name="email" value="{{ email }}">
+            <button type="submit" class="btn-confirm">Confirm Order</button>
+        </form>
+    </div>
+</body>
+</html>

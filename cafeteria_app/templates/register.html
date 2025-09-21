@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register - CrispyBite</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to bottom, #ffc107, #fff);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .register-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-box">
+        <h2 class="text-center text-danger">Register</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label>Name</label>
+                <input type="text" name="name" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label>Email</label>
+                <input type="email" name="email" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label>Phone</label>
+                <input type="text" name="phone" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-danger w-100">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

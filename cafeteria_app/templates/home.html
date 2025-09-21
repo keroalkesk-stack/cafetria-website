@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>CrispyBite - Welcome</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        body {
+            margin: 0;
+            height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(270deg, #dc3545, #ffc107, #28a745);
+            background-size: 600% 600%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 50%;
+        }
+
+        .container-box {
+            text-align: center;
+            color: white;
+            z-index: 10;
+            position: relative;
+        }
+
+        .container-box img {
+            width: 220px;
+            filter: drop-shadow(0 0 15px #fff);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .btn-fast {
+            background: #28a745;
+            color: white;
+            padding: 18px 50px;
+            font-size: 1.3rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-fast:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        .rocket {
+            display: inline-block;
+            margin-left: 10px;
+            position: relative;
+        }
+
+   
+        @keyframes rocketFly {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-500px) translateX(150px) rotate(-45deg); opacity: 0; }
+        }
+
+   
+        @keyframes particleExplode {
+            0% { transform: translate(0,0) scale(0.5); opacity: 1; }
+            100% { transform: translate(var(--dx), var(--dy)) scale(1); opacity: 0; }
+        }
+
+        .fly {
+            animation: rocketFly 1.2s forwards;
+        }
+
+        .explode {
+            animation: particleExplode 1.2s forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-box">
+        <img src="{% static 'images/CrispyBite_logo.png' %}" alt="CrispyBite Logo">
+        <div style="margin-top: 40px;">
+            <a href="{% url 'menu' %}" class="btn-fast" id="fastOrderBtn">
+                Fast Order <span class="rocket" id="rocket">🚀</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Audio -->
+    <audio id="rocketSound" src="{% static 'sounds/rocket.mp3' %}" preload="auto"></audio>
+
+    <script>
+        const btn = document.getElementById('fastOrderBtn');
+        const rocket = document.getElementById('rocket');
+        const rocketSound = document.getElementById('rocketSound');
+
+        
+        const numParticles = 20;
+        const particles = [];
+        for(let i=0;i<numParticles;i++){
+            const p = document.createElement('div');
+            p.classList.add('particle');
+            p.style.left = '50%';
+            p.style.top = '50%';
+            const dx = (Math.random()-0.5)*300 + 'px';
+            const dy = (Math.random()-0.5)*300 + 'px';
+            p.style.setProperty('--dx', dx);
+            p.style.setProperty('--dy', dy);
+            document.body.appendChild(p);particles.push(p);
+        }
+
+        btn.addEventListener('click', function(e){
+            e.preventDefault();
+
+            rocketSound.currentTime = 0;
+            rocketSound.play();
+
+            rocket.classList.add('fly');
+
+          
+            particles.forEach(p=>{
+                p.classList.add('explode');
+            });
+
+            setTimeout(()=>{
+                window.location.href = btn.href;
+            }, 1200);
+        });
+    </script>
+</body>
+</html>
